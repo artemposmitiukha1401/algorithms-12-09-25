@@ -18,7 +18,7 @@ void FillArr(T (&arr)[SIZE]) {
     PrintArr(arr);
 }
 template <typename T, const size_t SIZE>
-void FillArr(T (&arr)[SIZE], const size_t min_range, const size_t max_range) {
+void FillArr(T (&arr)[SIZE], const int min_range, const int max_range) {
     for (size_t i = 0; i < SIZE; i++)
         arr[i] = rand() % (max_range - min_range + 1) + min_range;
     PrintArr(arr);
@@ -188,8 +188,8 @@ int main() {
     // прибыль была минимальна с учетом выбранного диапазона.
 
     // int year_income_list[12];
-    // size_t min_range = 0;
-    // size_t max_range = 0;
+    // int min_range = 0;
+    // int max_range = 0;
     // std::cout << "Fill info for financial year: \n";
     // FillArrManually(year_income_list);
     // do {
