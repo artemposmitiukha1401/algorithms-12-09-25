@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 
 const int MIN_RAND = -100;
 const int MAX_RAND = 100;
@@ -143,12 +144,128 @@ void SumBetweenNegatives(const T (&arr)[SIZE]) {
 
     std::cout << "Sum between positions [" << first_negative_index << "] and [" << last_negative_index << "] is " << sum << std::endl;
 }
+const size_t RAND_NUM_SIZE = 4;
+int random_number[RAND_NUM_SIZE];
+int attempts = 0;
 
+template <typename T, const size_t RAND_NUM_SIZE>
+void GenerateNumber(T (&random_number)[RAND_NUM_SIZE]) {
+    for (size_t i = 0; i < RAND_NUM_SIZE; i++)
+        random_number[i] = rand() % (9 - 1 + 1) +1;
+}
+
+void DivideNumber(int num, int digits[], int current_index) {
+    if (current_index < 0) return;
+    digits[current_index] = num % 10;
+    DivideNumber(num / 10, digits, current_index - 1);
+}
+int CountCows(int user_guess[], int current_index) {
+    if (current_index >= 4) return 0;
+    return (user_guess[current_index] == random_number[current_index] ? 1 : 0) + CountCows(user_guess, current_index + 1);
+}
+int CountBulls(int user_guess[], int current_index) {
+    if (current_index >= 4) return 0;
+
+    int bulls = 0;
+    for (int i = 0; i < 4; i++) {
+        if (i != current_index && user_guess[current_index] == random_number[i]) {
+            bulls = 1;
+            break;
+        }
+    }
+    return bulls + CountBulls(user_guess, current_index + 1);
+}
+
+void BullsAndCows() {
+    attempts++;
+    int user_number = 0;
+    int user_guess[4];
+    std::cout << "Enter your guess: "; std::cin >> user_number;
+    DivideNumber(user_number, user_guess, 3);
+    int cows_count = CountCows(user_guess, 0);
+    int bulls_count = CountBulls(user_guess, 0);
+    std::cout << "Bulls: " << bulls_count << " | Cows: " << cows_count << std::endl;
+
+    if (cows_count == 4) {
+        std::cout << "You won!" << "\nAmount of attempts: " << attempts << std::endl;
+        std::cout << "Random number was: ";
+        for (int num: random_number) std::cout << num << " ";
+        return;
+    }
+    BullsAndCows();
+}
+
+struct Cell {
+    int x = 0, y = 0;
+    bool isPassed = 0;
+    int found_index = -1;
+};
+struct Knight {
+    int x = 0, y = 0;
+    int current_dr_index = 0;
+};
+
+int x_directions[] = {2, 1, -1, -2, -2, -1, 1, 2};
+int y_directions[] = {1, 2, 2, 1, -1, -2, -2, -1};
+const int BOARD_SIZE = 6;
+Knight knight;
+Cell board[BOARD_SIZE][BOARD_SIZE];
+int total_moves = 0;
+
+void InitializeBoard() {
+    for (size_t i = 0; i < BOARD_SIZE; i++) {
+        for (size_t j = 0; j < BOARD_SIZE; j++) {
+            board[i][j].x = i;
+            board[i][j].y = j;
+        }
+    }
+}
+void PrintBoard() {
+    for (size_t i = 0; i < BOARD_SIZE; i++) {
+        for (size_t j = 0; j < BOARD_SIZE; j++) {
+            std::cout << "[" << std::setw(3) << board[i][j].found_index << "] ";
+        }
+        std::cout << std::endl;
+    }
+}
+bool ValidateNextMove(int x, int y) {
+    return (x >= 0 && x < BOARD_SIZE &&
+            y >= 0 && y < BOARD_SIZE &&
+            !board[x][y].isPassed);
+}
+
+bool CalculatePath(int knight_position_x, int knight_position_y) {
+    knight.x = knight_position_x;
+    knight.y = knight_position_y;
+
+    board[knight_position_x][knight_position_y].isPassed = true;
+    board[knight_position_x][knight_position_y].found_index = total_moves++;
+
+    if (total_moves == BOARD_SIZE * BOARD_SIZE) {
+        PrintBoard();
+        return true;
+    }
+
+    for (size_t direction = 0; direction < 8; direction++) {
+        int next_move_x = knight_position_x + x_directions[direction];
+        int next_move_y = knight_position_y + y_directions[direction];
+
+        if (ValidateNextMove(next_move_x, next_move_y))
+            if (CalculatePath(next_move_x, next_move_y)) return true;
+
+    }
+
+    board[knight_position_x][knight_position_y].isPassed = false;
+    board[knight_position_x][knight_position_y].found_index = -1;
+    total_moves--;
+
+    return false;
+}
 
 int main() {
-    srand(time(NULL));
+    srand(time(nullptr));
 
-    const size_t SIZE = 20;
+    // const size_t SIZE = 20;
     // В одномерном массиве, заполненном случайными числами,
     // определить минимальный и максимальный элементы.
 
@@ -215,4 +332,33 @@ int main() {
     // ProductBetweenMinMax(arr);
     // ProductOfEven(arr);
     // SumBetweenNegatives(arr);
+
+    // Написать игру «Быки и коровы». Программа "загадывает" четырёхзначное число и играющий должен угадать его.
+    // После ввода пользователем числа программа сообщает, сколько цифр числа угадано (быки) и сколько цифр
+    // угадано и стоит на нужном месте (коровы). После отгадывания числа на экран необходимо вывести количество
+    // сделанных пользователем попыток. В программе необходимо использовать рекурсию.
+
+    // GenerateNumber(random_number);
+    // BullsAndCows();
+
+    // 10. Дана шахматная доска размером 8х8 и шахматный конь. Программа
+    // должна запросить у пользователя координаты клетки поля и поставить туда коня.
+    // Задача программы найти и вывести путь коня, при котором он обойдет все клетки
+    // доски, становясь в каждую клетку только один раз. (Так как процесс отыскания
+    // пути для разных начальных клеток может затянуться, то рекомендуется сначала
+    // опробовать задачу на поле размером 6хб). В программе необходимо использовать рекурсию.
+
+    // Сделал не самым эффективным способом, но по другому не получилось
+    InitializeBoard();
+    int start_position_x = 0, start_position_y = 0;
+    do {
+        std::cout << "Enter start position for x (< 6): "; std::cin >> start_position_x;
+    }while (start_position_x < 0 || start_position_x > BOARD_SIZE);
+
+    do {
+        std::cout << "Enter start position for y (< 6): "; std::cin >> start_position_y;
+    }while (start_position_y < 0 || start_position_y > BOARD_SIZE);
+
+    CalculatePath(start_position_x, start_position_y);
+
 }
